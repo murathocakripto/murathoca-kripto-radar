@@ -1,0 +1,31 @@
+name: Binance TR Baglanti Testi
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Binance TR erisim testi
+        run: |
+          python - <<'PY'
+          import urllib.request
+
+          urls = [
+              "https://www.binance.tr/open/v1/common/symbols",
+              "https://api.binance.me/api/v1/klines?symbol=BTCTRY&interval=1h&limit=5"
+          ]
+
+          for url in urls:
+              print("TEST:", url)
+              try:
+                  with urllib.request.urlopen(url, timeout=20) as response:
+                      data = response.read()
+                      print("HTTP:", response.status)
+                      print("Veri boyutu:", len(data))
+                      print("BASARILI")
+              except Exception as e:
+                  print("HATA:", str(e))
+          PY
