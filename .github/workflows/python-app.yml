@@ -1,4 +1,4 @@
-name: CoinGecko Fiyat Verisi Testi
+name: Coin Radar Gecmis Veri Testi
 
 on:
   workflow_dispatch:
@@ -8,42 +8,40 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Saatlik fiyat ve hacim testi
+      - name: Bes gunluk veri testi
         run: |
           python - <<'PY'
           import json
           import urllib.request
           import urllib.error
 
-          url = (
-              "https://api.coingecko.com/api/v3/coins/"
-              "bitcoin/market_chart?vs_currency=try&days=2"
-          )
+          url = "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=try&days=5"
 
-          request = urllib.request.Request(
+          req = urllib.request.Request(
               url,
               headers={"User-Agent": "MuratHocaRadar/1.0"}
           )
 
           try:
-              with urllib.request.urlopen(request, timeout=30) as response:
-                  data = json.load(response)
+              with urllib.request.urlopen(req, timeout=30) as r:
+                  data = json.load(r)
 
               prices = data.get("prices", [])
               volumes = data.get("total_volumes", [])
 
-              print("FIYAT VERISI SAYISI:", len(prices))
-              print("HACIM VERISI SAYISI:", len(volumes))
+              print("FIYAT KAYDI:", len(prices))
+              print("HACIM KAYDI:", len(volumes))
 
               if prices:
-                  print("SON FIYAT TL:", prices[-1][1])
+                  print("ILK ZAMAN:", prices[0][0])
+                  print("SON ZAMAN:", prices[-1][0])
 
-              if len(prices) >= 40 and len(volumes) >= 40:
-                  print("VERI TESTI BASARILI")
+              if len(prices) >= 100:
+                  print("100 KAYIT MEVCUT")
               else:
-                  print("YETERSIZ GECMIS VERI")
+                  print("100 KAYIT YOK")
 
-          except Exception as error:
-              print("TEST HATASI:", error)
+          except urllib.error.HTTPError as e:
+              print("HTTP HATASI:", e.code)
               raise
           PY
