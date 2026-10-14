@@ -1,4 +1,4 @@
-name: Binance TR Baglanti Testi
+name: Alternatif Veri Kaynagi Testi
 
 on:
   workflow_dispatch:
@@ -8,24 +8,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Binance TR erisim testi
+      - name: CoinGecko baglanti testi
         run: |
           python - <<'PY'
           import urllib.request
 
-          urls = [
-              "https://www.binance.tr/open/v1/common/symbols",
-              "https://api.binance.me/api/v1/klines?symbol=BTCTRY&interval=1h&limit=5"
-          ]
+          url = "https://api.coingecko.com/api/v3/ping"
 
-          for url in urls:
-              print("TEST:", url)
-              try:
-                  with urllib.request.urlopen(url, timeout=20) as response:
-                      data = response.read()
-                      print("HTTP:", response.status)
-                      print("Veri boyutu:", len(data))
-                      print("BASARILI")
-              except Exception as e:
-                  print("HATA:", str(e))
+          try:
+              request = urllib.request.Request(
+                  url,
+                  headers={"User-Agent": "MuratHocaCoinRadar/1.0"}
+              )
+              with urllib.request.urlopen(request, timeout=20) as response:
+                  print("HTTP:", response.status)
+                  print("CEVAP:", response.read().decode("utf-8"))
+                  print("BAGLANTI BASARILI")
+          except Exception as error:
+              print("BAGLANTI HATASI:", error)
+              raise
           PY
