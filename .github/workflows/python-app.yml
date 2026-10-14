@@ -1,4 +1,4 @@
-name: Alternatif Veri Kaynagi Testi
+name: CoinGecko Fiyat Verisi Testi
 
 on:
   workflow_dispatch:
@@ -8,23 +8,42 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: CoinGecko baglanti testi
+      - name: Saatlik fiyat ve hacim testi
         run: |
           python - <<'PY'
+          import json
           import urllib.request
+          import urllib.error
 
-          url = "https://api.coingecko.com/api/v3/ping"
+          url = (
+              "https://api.coingecko.com/api/v3/coins/"
+              "bitcoin/market_chart?vs_currency=try&days=2"
+          )
+
+          request = urllib.request.Request(
+              url,
+              headers={"User-Agent": "MuratHocaRadar/1.0"}
+          )
 
           try:
-              request = urllib.request.Request(
-                  url,
-                  headers={"User-Agent": "MuratHocaCoinRadar/1.0"}
-              )
-              with urllib.request.urlopen(request, timeout=20) as response:
-                  print("HTTP:", response.status)
-                  print("CEVAP:", response.read().decode("utf-8"))
-                  print("BAGLANTI BASARILI")
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  data = json.load(response)
+
+              prices = data.get("prices", [])
+              volumes = data.get("total_volumes", [])
+
+              print("FIYAT VERISI SAYISI:", len(prices))
+              print("HACIM VERISI SAYISI:", len(volumes))
+
+              if prices:
+                  print("SON FIYAT TL:", prices[-1][1])
+
+              if len(prices) >= 40 and len(volumes) >= 40:
+                  print("VERI TESTI BASARILI")
+              else:
+                  print("YETERSIZ GECMIS VERI")
+
           except Exception as error:
-              print("BAGLANTI HATASI:", error)
+              print("TEST HATASI:", error)
               raise
           PY
